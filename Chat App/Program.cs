@@ -21,7 +21,8 @@ namespace Chat_App
 
                     Socket cliantSocket = listeningSocket.Accept();
 
-                    cliantSocket.Send(ASCIIEncoding.ASCII.GetBytes("Hello Mustafa 1!"));
+                    string strToSend = Console.ReadLine();
+                    cliantSocket.Send(ASCIIEncoding.ASCII.GetBytes("Hello Mustafa 1!\n" + strToSend));
 
                     Byte[] receivedBuffer = new Byte[1024];
                     cliantSocket.Receive(receivedBuffer);
@@ -39,7 +40,8 @@ namespace Chat_App
 
                     Console.WriteLine(ASCIIEncoding.ASCII.GetString(recievedBuffer));
 
-                    socket.Send(ASCIIEncoding.ASCII.GetBytes("Hello server 6969!"));
+                    string strToSend = Console.ReadLine();
+                    socket.Send(ASCIIEncoding.ASCII.GetBytes("Hello server 6969!\n" + strToSend));
                 }
             } else {
                 Console.WriteLine("Please provide arguments to this application either type -server or -client");
