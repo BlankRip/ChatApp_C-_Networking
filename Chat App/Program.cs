@@ -28,14 +28,14 @@ namespace Chat_App
                                 Console.WriteLine(ex);
                         }
 
-                        for (int i = 0; i < clientSockets.Count; i++)
-                        {
+                        for (int i = 0; i < clientSockets.Count; i++) {
                             try {
                                 Byte[] receivedBuffer = new Byte[1024];
-                                clientSockets[i].Receive(receivedBuffer);
+                                int bytesRecieved = clientSockets[i].Receive(receivedBuffer);
+
                                 for (int j = 0; j < clientSockets.Count; j++) {
                                     if (i != j)
-                                        clientSockets[j].Send(receivedBuffer);
+                                        clientSockets[j].Send(receivedBuffer, bytesRecieved, SocketFlags.None);
                                 }
                             } catch (SocketException ex) {
                                 if (ex.SocketErrorCode == SocketError.ConnectionAborted || ex.SocketErrorCode == SocketError.ConnectionReset) {
@@ -56,15 +56,33 @@ namespace Chat_App
                     Console.WriteLine("Connected to Server!!");
                     socket.Blocking = false;
 
+                    string strToSend = null;
+                    Console.Write("Enter your Chat Tag:");
+                    string theTag = Console.ReadLine();
+                    theTag += ": ";
+
+                    Console.WriteLine("Type Now, It will work: ");
                     while(true) {
                         try {
-                            Console.Write("Type Now, Here: ");
-                            string strToSend = Console.ReadLine();
-                            socket.Send(ASCIIEncoding.ASCII.GetBytes(strToSend));
+                            if(Console.KeyAvailable) {
+                                ConsoleKeyInfo key = Console.ReadKey();
+
+                                if (key.Key == ConsoleKey.Enter) {
+                                    strToSend = theTag + strToSend;
+                                    socket.Send(ASCIIEncoding.ASCII.GetBytes(strToSend));
+                                    strToSend = null;
+                                    Console.WriteLine();
+                                } else {
+                                    strToSend += key.KeyChar;
+                                }
+                            }
+                            
 
                             Byte[] recievedBuffer = new Byte[1024];
-                            socket.Receive(recievedBuffer);
-                            Console.WriteLine(ASCIIEncoding.ASCII.GetString(recievedBuffer));
+                            int bytesRecieved = socket.Receive(recievedBuffer);
+                            string strToPrint = ASCIIEncoding.ASCII.GetString(recievedBuffer);
+                            strToPrint = strToPrint.Substring(0, bytesRecieved);
+                            Console.WriteLine(strToPrint);
                         }
                         catch (SocketException ex) {
                             if (ex.SocketErrorCode != SocketError.WouldBlock)
