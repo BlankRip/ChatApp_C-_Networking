@@ -14,10 +14,16 @@ namespace Chat_App
             List<Socket> clientSockets = new List<Socket>();
             if (args.Length > 0) {
                 if(args[0] == "-server") {
+                    int port = 1;
+                    bool validPort = int.TryParse(args[1], out port);
+
+                    if (!validPort)
+                        throw new Exception("Argument two should be a port number; the provided value is not a number");
+
                     Socket listeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                     listeningSocket.Blocking = false;
 
-                    listeningSocket.Bind(new IPEndPoint(IPAddress.Any, 420));
+                    listeningSocket.Bind(new IPEndPoint(IPAddress.Any, port));
                     Console.WriteLine("Waiting for connection...");
                     listeningSocket.Listen(10);
                     while(true) {
@@ -49,10 +55,20 @@ namespace Chat_App
                         }
                     }
                 } else if(args[0] == "-client") {
+                    IPAddress theIp;
+                    bool validIp = IPAddress.TryParse(args[1], out theIp);
+                    if (!validIp)
+                        throw new Exception("Argument two should be a port number; the provided IP is invalid");
+
+                    int port = 1;
+                    bool validPort = int.TryParse(args[2], out port);
+                    if (!validPort)
+                        throw new Exception("Argument three should be a port number; the provided value is not a number");
+
                     Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
                     Console.WriteLine("Connection...");
-                    socket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 420));
+                    socket.Connect(new IPEndPoint(theIp, port));
                     Console.WriteLine("Connected to Server!!");
                     socket.Blocking = false;
 
@@ -76,15 +92,13 @@ namespace Chat_App
                                     strToSend += key.KeyChar;
                                 }
                             }
-                            
 
                             Byte[] recievedBuffer = new Byte[1024];
                             int bytesRecieved = socket.Receive(recievedBuffer);
                             string strToPrint = ASCIIEncoding.ASCII.GetString(recievedBuffer);
                             strToPrint = strToPrint.Substring(0, bytesRecieved);
                             Console.WriteLine(strToPrint);
-                        }
-                        catch (SocketException ex) {
+                        } catch (SocketException ex) {
                             if (ex.SocketErrorCode != SocketError.WouldBlock)
                                 Console.WriteLine(ex);
                         }
