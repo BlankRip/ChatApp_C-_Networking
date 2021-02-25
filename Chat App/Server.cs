@@ -7,6 +7,7 @@ namespace Chat_App
 {
     public class Server
     {
+        Dictionary<Socket, string> dic = new Dictionary<Socket, string>();
         List<Socket> clientSockets = new List<Socket>();
         int port;
 
